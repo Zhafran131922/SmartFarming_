@@ -9,6 +9,7 @@ import SettingsIcon from "../images/settings.png";
 const Navbar = () => {
   const navigation = useNavigation();
   const [activeIcon, setActiveIcon] = useState("Dashboard");
+  
   const navigateToDashboard = () => {
     setActiveIcon("Dashboard");
     navigation.navigate("Dashboard");
@@ -61,21 +62,25 @@ const styles = StyleSheet.create({
   navbar: {
     flexDirection: "row",
     backgroundColor: "#d9d9d9",
-    paddingVertical: 10,
+    alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    bottom: 40,
-    width: "45%",
+    bottom: 20,
+    width: 200,
+    height: 60,
     alignSelf: "center",
-    borderRadius: 100,
+    borderRadius: 35,
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   menuItem: {
-    paddingVertical: 0,
-    paddingHorizontal: 30,
     justifyContent: "center",
     alignItems: "center",
     width: 50,
     height: 50,
+    marginHorizontal: 10,
+    borderRadius: 25,
   },
   menuIcon: {
     width: 30,
@@ -83,9 +88,7 @@ const styles = StyleSheet.create({
   },
   activeMenuItem: {
     backgroundColor: "#B6C4B6",
-    borderRadius: 100,
-    width: 50,
-    height: 50,
+    borderRadius: 25,
   },
 });
 

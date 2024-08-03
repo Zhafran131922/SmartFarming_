@@ -18,6 +18,11 @@ const MasaPanen = () => {
       date: "2023-05-01",
       image: require("../../images/tomat.jpg"),
     },
+    {
+      name: "Timun",
+      date: "2023-05-01",
+      image: require("../../images/tomat.jpg"),
+    },
   ];
 
   return (
@@ -27,7 +32,7 @@ const MasaPanen = () => {
           <View key={index} style={styles.plantCard}>
             <Image source={plant.image} style={styles.plantImage} />
             <View style={styles.plantDetails}>
-              <Text style={styles.karyawan}>{plant.name}</Text>
+              <Text style={styles.plantName}>{plant.name}</Text>
               <View style={styles.panen}>
                 <Text style={styles.dateLabel}>{`Siap Panen:`}</Text>
                 <Text style={styles.dateValue}>{plant.date}</Text>
@@ -47,25 +52,38 @@ const styles = StyleSheet.create({
   },
   plantCard: {
     backgroundColor: "#E0E0E0",
-    padding: 20,
+    padding: 12,
     borderRadius: 10,
-    margin: 10,
-    height: 120,
+    marginTop: 10,
+    margin: 5,
+    height: 90,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   plantImage: {
-    width: 100,
-    height: 100,
+    width: 70,
+    height: 70,
     borderRadius: 10,
     justifyContent: "center",
+    alignItems: "center",
   },
   plantDetails: {
     marginLeft: 150,
     justifyContent: "center",
-    marginLeft: 10,
+    marginLeft: 49,
+    left: -40,
+    flex: 1,
   },
-  karyawan: {
+  plantName: {
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 10,
@@ -73,7 +91,7 @@ const styles = StyleSheet.create({
   },
   panen: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
   area: {
     fontSize: 17,
@@ -82,13 +100,11 @@ const styles = StyleSheet.create({
   },
   dateLabel: {
     fontSize: 17,
-    fontWeight: "bold",
     marginLeft: 10,
     color: "black",
   },
   dateValue: {
     fontSize: 17,
-    fontWeight: "bold",
     marginLeft: 10,
     color: "red",
   },

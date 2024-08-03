@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "react-native";
-import { useTheme } from "../../components/ThemeContect";
+import { useTheme } from "../../components/ThemeContext";
 
 const Penyiraman = () => {
   const { colors } = useTheme();
@@ -128,23 +128,36 @@ const styles = StyleSheet.create({
   },
   plantCard: {
     backgroundColor: "#E0E0E0",
-    padding: 20,
+    padding: 12,
     borderRadius: 10,
-    margin: 10,
-    height: 120,
+    marginTop: 10,
+    margin: 5,
+    height: 90,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   plantImage: {
-    width: 100,
-    height: 100,
+    width: 70,
+    height: 70,
     borderRadius: 10,
     justifyContent: "center",
+    alignItems: "center",
   },
   plantDetails: {
     marginLeft: 150,
     justifyContent: "center",
-    marginLeft: 10,
+    marginLeft: 49,
+    left: -40,
+    flex: 1,
   },
   plantName: {
     fontSize: 18,
@@ -155,13 +168,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 10,
-    marginLeft: 10,
   },
   plantStatusText: {
-    padding: 10,
+    padding: 6,
     borderRadius: 5,
     color: "white",
     marginLeft: 10,
+    fontSize: 13,
   },
   statusItem: {
     flexDirection: "row",
@@ -173,8 +186,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 1,
-    borderRadius: 10,
-    width: 120,
+    borderRadius: 20,
+    width: 140,
     paddingHorizontal: 10,
   },
   fertilized: {
@@ -182,7 +195,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 5,
-    borderRadius: 10,
+    borderRadius: 20,
     width: 140,
     paddingHorizontal: 10,
   },

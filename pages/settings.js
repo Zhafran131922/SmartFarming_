@@ -11,13 +11,13 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import { useTheme } from "../components/ThemeContect";
+import { useTheme } from "../components/ThemeContext";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const Settings = () => {
+  const navigation = useNavigation();
   const [isNotificationEnabled, setNotificationEnabled] = React.useState(true);
   const [isDarkmodeEnabled, setDarkmodeEnabled] = React.useState(false);
-  const navigation = useNavigation();
   const { colors, toggleTheme } = useTheme();
   const toggleSwitch = () =>
     setNotificationEnabled((previousState) => !previousState);
@@ -25,6 +25,10 @@ const Settings = () => {
   const toggleDarkMode = () => {
     setDarkmodeEnabled((previousState) => !previousState);
     toggleTheme();
+  };
+
+  const navigateToTentang = () => {
+    navigation.navigate("Tentang");
   };
 
   const navigateToLogin = () => {
@@ -180,6 +184,7 @@ const Settings = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={navigateToTentang}
             style={[styles.optionBottom, { backgroundColor: colors.card }]}
           >
             <MaterialIcons

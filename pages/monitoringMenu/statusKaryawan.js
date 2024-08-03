@@ -1,11 +1,23 @@
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
+import React from "react";
+import { StyleSheet, Text, View, ScrollView, Image } from "react-native";
 
 const StatusKaryawan = () => {
   const plantData = [
-    { name: 'Karyawan 1', area:'Area 1', image: require('../../images/tomat.jpg') },
-    { name: 'Karyawan 2', area:'Area 2', image: require('../../images/tomat.jpg') },
-    { name: 'Karyawan 3', area:'Area 3', image: require('../../images/tomat.jpg') },
+    {
+      name: "Karyawan 1",
+      area: "Area 1",
+      image: require("../../images/tomat.jpg"),
+    },
+    {
+      name: "Karyawan 2",
+      area: "Area 2",
+      image: require("../../images/tomat.jpg"),
+    },
+    {
+      name: "Karyawan 3",
+      area: "Area 3",
+      image: require("../../images/tomat.jpg"),
+    },
   ];
 
   return (
@@ -28,60 +40,63 @@ const StatusKaryawan = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   plantCard: {
-    backgroundColor: '#E0E0E0',
-    padding: 20,
+    backgroundColor: "#E0E0E0",
+    padding: 12,
     borderRadius: 10,
-    margin: 10,
-    height: 120,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginTop: 10,
+    margin: 5,
+    height: 90,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   plantImage: {
-    width: 100,
-    height: 100,
+    width: 70,
+    height: 70,
     borderRadius: 10,
-    justifyContent: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   plantDetails: {
     marginLeft: 150,
-    justifyContent: 'center',
-    marginLeft: 10,
+    justifyContent: "center",
+    marginLeft: 49,
+    left: -40,
+    flex: 1,
   },
   karyawan: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 10,
-    top: -10,
   },
   area: {
     fontSize: 17,
-    fontWeight: 'bold',
     marginLeft: 10,
+    backgroundColor: "#2F4C2F",
+    color: "#fff",
+    padding: 5,
+    borderRadius: 10,
+    alignSelf: "flex-start",
+    flexShrink: 1,
   },
   plantStatus: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 10,
     marginLeft: 10,
   },
-  plantStatusText: {
-    padding: 10,
-    borderRadius: 5,
-    color: 'white',
-    marginLeft: 10,
-  },
-  watered: {
-    backgroundColor: '#00BCD4',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 1,
-    borderRadius: 10,
-    width: 120,
-    paddingHorizontal: 10,
-  },
+
   plantIcon: {
     marginRight: -5,
   },

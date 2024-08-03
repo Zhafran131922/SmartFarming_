@@ -5,7 +5,7 @@ import MasaPanen from '../pages/monitoringMenu/masaPanen';
 import Pemupukan from '../pages/monitoringMenu/pemupukan';
 import Penyiraman from '../pages/monitoringMenu/penyiraman';
 import StatusKaryawan from '../pages/monitoringMenu/statusKaryawan';
-import { useTheme } from '../components/ThemeContect';
+import { useTheme } from './ThemeContext';
 
 const initialLayout = { width: Dimensions.get('window').width };
 
@@ -37,8 +37,8 @@ const MonitoringMenu= () => {
         {...props}
         scrollEnabled
         indicatorStyle={styles.indicator}
-        style={[styles.tabBar, { backgroundColor: colors.background }]} // Menggunakan colors.background dari tema
-        labelStyle={[styles.label, { color: colors.text }]} // Menggunakan colors.text dari tema
+        style={[styles.tabBar, { backgroundColor: colors.background }]} 
+        labelStyle={[styles.label, { color: colors.text }]} 
         tabStyle={styles.tab}
         renderLabel={({ route, focused, color }) => (
           <View style={[styles.tabView, focused && styles.activeTab]}>

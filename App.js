@@ -8,14 +8,16 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
+import Description from "./pages/description";
 import Monitoring from "./pages/monitoring";
 import Settings from "./pages/settings";
 import Navbar from "./components/Navbar";
 import MasaPanen from "./pages/monitoringMenu/masaPanen";
 import Pemupukan from "./pages/monitoringMenu/pemupukan";
 import Penyiraman from "./pages/monitoringMenu/penyiraman";
+import Tentang from "./pages/tentang";
 import StatusKaryawan from "./pages/monitoringMenu/statusKaryawan";
-import { ThemeProvider, useTheme } from './components/ThemeContect';
+import { ThemeProvider, useTheme } from './components/ThemeContext';
 import { StatusBar } from 'react-native';
 
 const Stack = createNativeStackNavigator();
@@ -62,13 +64,15 @@ export default function App() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="Monitoring" component={Monitoring} />
+          <Stack.Screen name="Description" component={Description} />
+          <Stack.Screen name="Tentang" component={Tentang} />
           <Stack.Screen name="Settings" component={Settings} />
           <Stack.Screen name="MasaPanen" component={MasaPanen} />
           <Stack.Screen name="Pemupukan" component={Pemupukan} />
           <Stack.Screen name="Penyiraman" component={Penyiraman} />
           <Stack.Screen name="StatusKaryawan" component={StatusKaryawan} />
         </Stack.Navigator>
-        {currentRoute !== "Register" && currentRoute !== "Login" && <Navbar />}
+        {currentRoute !== "Register" && currentRoute !== "Login" &&  <Navbar />}
       </NavigationContainer>
     </ThemeProvider>
   );

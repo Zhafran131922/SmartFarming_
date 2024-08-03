@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import { useTheme } from '../components/ThemeContect'; // Pastikan Anda mengimpor useTheme dari konteks tema yang sudah ada
-import Navbar from '../components/Navbar';
+import { useTheme } from '../components/ThemeContext'; 
 import MonitoringMenu from '../components/MonitoringMenu';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -17,7 +16,7 @@ const Monitoring = () => {
           end={{ x: 1, y: 1 }}
           style={styles.weatherCard}
         >
-          <Text style={[styles.page, { color: colors.text }]}>Monitoring Tanaman</Text>
+          <Text style={styles.page}>Monitoring Tanaman</Text>
         </LinearGradient>
         <MonitoringMenu />
       </ScrollView>
@@ -43,6 +42,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: '#fff',
   },
 });
 
