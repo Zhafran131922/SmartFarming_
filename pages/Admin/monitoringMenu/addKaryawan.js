@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-const EditPlant = ({ modalVisible, setModalVisible }) => {
+const AddPlant = ({ modalVisible, setModalVisible }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [area, setArea] = useState("");
@@ -23,7 +23,7 @@ const EditPlant = ({ modalVisible, setModalVisible }) => {
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <View style={styles.modalTitleContainer}>
-            <Text style={styles.modalTitle}>Edit Tanaman</Text>
+            <Text style={styles.modalTitle}>Tambah Karyawan</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
@@ -133,4 +133,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditPlant;
+export default AddPlant;

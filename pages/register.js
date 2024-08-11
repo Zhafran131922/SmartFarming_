@@ -6,26 +6,54 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  Alert,
 } from "react-native";
 import Logo from "../images/logo2.png";
-import Email from "../images/email.png";
 import Password from "../images/password.png";
-import Telp from "../images/phone.png";
 import Username from "../images/username.png";
 import CustomTextInput from "../components/CustomTextInput";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
 const Register = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
 
   const screenHeight = Dimensions.get("window").height;
 
   const navigateToLogin = () => {
-    navigation.navigate("Login");
+    navigation.navigate("Dashboard");
   };
+
+  const handleRegister = async () => {
+    try {
+      const response = await fetch("http://192.168.18.22:3000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          role: "user",
+          email: email,
+          password: password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        Alert.alert("Success", data.message);
+        navigateToLogin(); // Navigate to login screen on successful registration
+      } else {
+        Alert.alert("Error", data.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);  // Log the error for debugging
+      Alert.alert("Error", "Failed to register. Please try again later.");
+    }
+  };
+  
 
   return (
     <LinearGradient
@@ -34,31 +62,16 @@ const Register = () => {
       end={{ x: 1, y: 1 }}
       style={styles.container}
     >
-      <View style={styles.logoContainer}>
-        <Image source={Logo} style={styles.logo} />
-      </View>
+      <Image source={Logo} style={styles.logo} />
+      <View style={styles.logoContainer}></View>
       <Text style={styles.welcomeText}>REGISTRASI</Text>
       <View style={[styles.innerContainer, { height: screenHeight * 0.45 }]}>
         <View style={styles.inputContainer}>
           <CustomTextInput
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-            imageSource={Username}
-          />
-          <CustomTextInput
             placeholder="Email"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            imageSource={Email}
-          />
-          <CustomTextInput
-            placeholder="No.Telp"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            imageSource={Telp}
+            value={email}
+            onChangeText={setEmail}
+            imageSource={Username}
           />
           <CustomTextInput
             placeholder="Password"
@@ -68,14 +81,16 @@ const Register = () => {
             imageSource={Password}
           />
         </View>
-        <LinearGradient
-          colors={["#163020", "#0f1e14"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.loginButton}
-        >
-          <Text style={styles.loginButtonText}>Registrasi</Text>
-        </LinearGradient>
+        <TouchableOpacity onPress={handleRegister}>
+          <LinearGradient
+            colors={["#163020", "#0f1e14"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.loginButton}
+          >
+            <Text style={styles.loginButtonText}>Registrasi</Text>
+          </LinearGradient>
+        </TouchableOpacity>
         <TouchableOpacity>
           <Text style={styles.registerText}>
             Sudah punya akun?{" "}
@@ -88,7 +103,6 @@ const Register = () => {
     </LinearGradient>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -102,13 +116,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     position: "absolute",
-    top: -170,
+    top: 20,
   },
   welcomeText: {
-    fontSize: 24,
+    fontSize: 20,
     color: "white",
     marginBottom: 20,
     fontWeight: "bold",

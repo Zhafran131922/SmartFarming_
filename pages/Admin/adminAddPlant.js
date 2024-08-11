@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,11 +7,60 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from "../../components/AuthContext";
 
-const EditPlant = ({ modalVisible, setModalVisible }) => {
+const AddPlant = ({ modalVisible, setModalVisible }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [area, setArea] = useState("");
+  const [id, setId] = useState(1);
+  const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchId = async () => {
+      try {
+        const lastId = await AsyncStorage.getItem('lastId');
+        if (lastId) {
+          setId(parseInt(lastId, 10) + 1);
+        }
+      } catch (error) {
+        console.error("Failed to load last ID from AsyncStorage", error);
+      }
+    };
+
+    fetchId();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch("http://192.168.18.22:3000/api/admin/add/tanaman", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id,
+          area,
+          description,
+          name,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add plant");
+      }
+
+      const data = await response.json();
+      console.log("Plant added successfully:", data);
+
+      await AsyncStorage.setItem('lastId', id.toString());
+      setModalVisible(false); 
+    } catch (error) {
+      console.error("Error adding plant:", error);
+    }
+  };
 
   return (
     <Modal
@@ -23,7 +72,7 @@ const EditPlant = ({ modalVisible, setModalVisible }) => {
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <View style={styles.modalTitleContainer}>
-            <Text style={styles.modalTitle}>Edit Tanaman</Text>
+            <Text style={styles.modalTitle}>Tambah Tanaman</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
@@ -51,9 +100,7 @@ const EditPlant = ({ modalVisible, setModalVisible }) => {
           />
           <TouchableOpacity
             style={styles.saveButton}
-            onPress={() => {
-              setModalVisible(false);
-            }}
+            onPress={handleSave}
           >
             <Text style={styles.saveButtonText}>Simpan</Text>
           </TouchableOpacity>
@@ -133,4 +180,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditPlant;
+export default AddPlant;

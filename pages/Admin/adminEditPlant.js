@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -8,10 +8,28 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-const EditPlant = ({ modalVisible, setModalVisible }) => {
+const EditPlant = ({ modalVisible, setModalVisible, plant, onSave }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [area, setArea] = useState("");
+
+  useEffect(() => {
+    if (plant) {
+      setName(plant.name);
+      setArea(plant.area);
+      setDescription(plant.description);
+    }
+  }, [plant]);
+
+  const handleSave = () => {
+    const updatedPlant = {
+      name,
+      area,
+      description,
+    };
+
+    onSave(updatedPlant);
+  };
 
   return (
     <Modal
@@ -51,9 +69,7 @@ const EditPlant = ({ modalVisible, setModalVisible }) => {
           />
           <TouchableOpacity
             style={styles.saveButton}
-            onPress={() => {
-              setModalVisible(false);
-            }}
+            onPress={handleSave}
           >
             <Text style={styles.saveButtonText}>Simpan</Text>
           </TouchableOpacity>
@@ -62,6 +78,7 @@ const EditPlant = ({ modalVisible, setModalVisible }) => {
     </Modal>
   );
 };
+
 
 const styles = StyleSheet.create({
   modalContainer: {

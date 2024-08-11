@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useTheme } from "../components/ThemeContext";
+import { useTheme } from "../../components/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
-import AddPlant from "./addPlant";
-import Watered from "../images/siram.png";
-import Fertilized from "../images/pupuk.png";
+import AdminAddPlant from "./adminAddPlant";
+import Watered from "../../images/siram.png";
+import Fertilized from "../../images/pupuk.png";
+import Checklist from "../../images/verified.png";
+import { useAuth } from "../../components/AuthContext";
 
 const getCurrentDateTimeWIB = () => {
   const now = new Date();
@@ -32,53 +34,72 @@ const getCurrentDateTimeWIB = () => {
   return { day, time };
 };
 
-const Dashboard = () => {
+const AdminDashboard = () => {
   const { colors } = useTheme();
   const [dateTime, setDateTime] = useState(getCurrentDateTimeWIB());
   const [modalVisible, setModalVisible] = useState(false);
+  const [plantData, setPlantData] = useState([]);
   const navigation = useNavigation();
+  const { token } = useAuth();
 
-  const NavigateToDescription = () => {
-    navigation.navigate("Description");
+  useEffect(() => {
+    const fetchPlantData = async () => {
+      try {
+        const response = await fetch(
+          "http://192.168.18.22:3000/api/admin/get/tanaman",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+
+        const plants = Object.values(data).map((plant) => ({
+          id: plant.id,
+          name: plant.name,
+          area: plant.area,
+          description: plant.description,
+          watered: true,
+          fertilized: true,
+          image: require("../../images/tomat.jpg"),
+        }));
+
+        setPlantData(plants);
+      } catch (error) {
+        console.error("Error fetching plant data:", error);
+      }
+    };
+
+    fetchPlantData();
+  }, [token]);
+
+  const NavigateToDescription = (selectedPlant) => {
+    const matchingPlant = plantData.find(
+      (plant) => plant.name === selectedPlant.name
+    );
+
+    if (matchingPlant) {
+      navigation.navigate("AdminDescription", {
+        plant: {
+          id: matchingPlant.id,
+          name: matchingPlant.name,
+          area: matchingPlant.area,
+          description: matchingPlant.description,
+        },
+      });
+    } else {
+      console.error("No matching plant found!");
+    }
   };
-
-  const plantData = [
-    {
-      name: "Tomat",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Pepaya",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Jeruk",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Pepaya",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Jeruk",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-  ];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
-        contentContainerStyle={[styles.scrollViewContent, { backgroundColor: colors.background }]}
+        contentContainerStyle={[
+          styles.scrollViewContent,
+          { backgroundColor: colors.background },
+        ]}
       >
         <LinearGradient
           colors={["#163020", "#0f1e14"]}
@@ -88,6 +109,13 @@ const Dashboard = () => {
         >
           <Text style={styles.day}>{dateTime.day}</Text>
           <Text style={styles.time}>{dateTime.time}</Text>
+          <View style={styles.admintextcontainer}>
+            <Text style={styles.admintext}>Admin Page</Text>
+            <Image
+              source={Checklist}
+              style={styles.verified}
+            />
+          </View>
           <Text style={styles.temperature}>22°C</Text>
           <FontAwesome5
             name="cloud-sun"
@@ -101,7 +129,7 @@ const Dashboard = () => {
               <Text style={styles.weatherDetailText}>Raindrop</Text>
               <Text style={styles.weatherDetailValue}>1000 mm/h</Text>
             </View>
-            <View style={styles.spacing}/>
+            <View style={styles.spacing} />
             <View style={styles.weatherDetailItem}>
               <MaterialIcons name="opacity" size={24} color="white" />
               <Text style={styles.weatherDetailText}>Kelembapan</Text>
@@ -113,7 +141,7 @@ const Dashboard = () => {
           <TouchableOpacity
             key={index}
             style={[styles.plantCard, { backgroundColor: colors.card }]}
-            onPress={NavigateToDescription}
+            onPress={() => NavigateToDescription(plant)}
           >
             <Image source={plant.image} style={styles.plantImage} />
             <View style={styles.plantDetails}>
@@ -155,14 +183,14 @@ const Dashboard = () => {
         <View style={styles.bottomSpace} />
       </ScrollView>
 
-      <TouchableOpacity style={styles.circle} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity
+        style={styles.circle}
+        onPress={() => setModalVisible(true)}
+      >
         <Text style={styles.plus}>+</Text>
       </TouchableOpacity>
 
-      <AddPlant
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-      />
+      <AdminAddPlant modalVisible={modalVisible} setModalVisible={setModalVisible} />
     </View>
   );
 };
@@ -173,7 +201,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   scrollViewContent: {
-    paddingBottom: 70, 
+    paddingBottom: 70,
   },
   weatherCard: {
     backgroundColor: "#163020",
@@ -196,6 +224,20 @@ const styles = StyleSheet.create({
     fontSize: 48,
     color: "white",
     fontWeight: "bold",
+  },
+  admintextcontainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  admintext: {
+    fontSize: 20,
+    color: "white",
+    fontWeight: "bold",
+  },
+  verified: {
+    marginLeft: 5,
+    width: 20,
+    height: 20,
   },
   weatherIcon: {
     position: "absolute",
@@ -307,13 +349,6 @@ const styles = StyleSheet.create({
     marginRight: -5,
     width: 20,
     height: 20,
-
-  },
-  navbar: {
-    flexDirection: "row",
-    backgroundColor: "#6200EE",
-    paddingVertical: 10,
-    justifyContent: "space-around",
   },
   menuItem: {
     paddingVertical: 10,
@@ -344,4 +379,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Dashboard;
+export default AdminDashboard;
