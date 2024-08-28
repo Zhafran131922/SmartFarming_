@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import About from "../images/about.jpg";
+import About from "../../images/about.jpg";
 
 const PlantDetail = () => {
   const mahasiswa = [

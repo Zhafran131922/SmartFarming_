@@ -15,7 +15,7 @@ const MonitoringMenu= () => {
     const [routes] = React.useState([
         { key: 'penyiraman', title: 'Penyiraman' },
         { key: 'masaPanen', title: 'Masa Panen' },
-        { key: 'statusKaryawan', title: 'Status Karyawan' },
+        // { key: 'statusKaryawan', title: 'Status Karyawan' },
         { key: 'pemupukan', title: 'Pemupukan' },
     ]);
 

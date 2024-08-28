@@ -193,7 +193,7 @@ const Settings = () => {
               style={[styles.Icon, { color: colors.text }]}
             />
             <Text style={[styles.optionText, { color: colors.text }]}>
-              Tentang
+              Tentang Kami
             </Text>
             <MaterialIcons
               name="arrow-forward-ios"

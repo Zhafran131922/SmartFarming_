@@ -14,9 +14,9 @@ const MonitoringMenu= () => {
     const [index, setIndex] = React.useState(0);
     const [routes] = React.useState([
         { key: 'penyiraman', title: 'Penyiraman' },
+        { key: 'pemupukan', title: 'Pemupukan' },
         { key: 'masaPanen', title: 'Masa Panen' },
         { key: 'statusKaryawan', title: 'Status Karyawan' },
-        { key: 'pemupukan', title: 'Pemupukan' },
     ]);
 
     const renderScene = SceneMap({

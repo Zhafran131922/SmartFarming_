@@ -7,20 +7,23 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../components/AuthContext";
+import { Picker } from "@react-native-picker/picker"; 
 
-const AddPlant = ({ modalVisible, setModalVisible }) => {
+const AddPlant = ({ modalVisible, setModalVisible, onAddPlant }) => {
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [description, setDescription] = useState("");
   const [area, setArea] = useState("");
   const [id, setId] = useState(1);
+  const [users, setUsers] = useState([]);
   const { token } = useAuth();
 
   useEffect(() => {
     const fetchId = async () => {
       try {
-        const lastId = await AsyncStorage.getItem('lastId');
+        const lastId = await AsyncStorage.getItem("lastId");
         if (lastId) {
           setId(parseInt(lastId, 10) + 1);
         }
@@ -32,31 +35,63 @@ const AddPlant = ({ modalVisible, setModalVisible }) => {
     fetchId();
   }, []);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/getUser/users"
+        );
+        const data = await response.json();
+        const usersList = Object.values(data).map((user) => ({
+          username: user.username,
+          area: user.areaKaryawan,
+        }));
+        setUsers(usersList);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const handleSave = async () => {
     try {
-      const response = await fetch("http://192.168.18.22:3000/api/admin/add/tanaman", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          id,
-          area,
-          description,
-          name,
-        }),
-      });
+      const response = await fetch(
+        "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/add/tanaman",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id,
+            description,
+            name,
+            username,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to add plant");
       }
 
       const data = await response.json();
-      console.log("Plant added successfully:", data);
 
-      await AsyncStorage.setItem('lastId', id.toString());
-      setModalVisible(false); 
+      const newPlant = {
+        id: data.id,
+        name: name,
+        description: description,
+        username: username,
+        watered: true,
+        fertilized: true,
+        image: require("../../images/tomat.jpg"),
+      };
+
+      onAddPlant(newPlant);
+      setModalVisible(false);
     } catch (error) {
       console.error("Error adding plant:", error);
     }
@@ -88,20 +123,24 @@ const AddPlant = ({ modalVisible, setModalVisible }) => {
           />
           <TextInput
             style={[styles.input, styles.input]}
-            placeholder="Area"
-            value={area}
-            onChangeText={setArea}
-          />
-          <TextInput
-            style={[styles.input, styles.input]}
             placeholder="Deskripsi"
             value={description}
             onChangeText={setDescription}
           />
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
+          <Picker
+            selectedValue={username}
+            onValueChange={(itemValue) => setUsername(itemValue)}
+            style={styles.picker}
           >
+            {users.map((user, index) => (
+              <Picker.Item
+                key={index}
+                label={`${user.username} (${user.area})`}
+                value={user.username}
+              />
+            ))}
+          </Picker>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Simpan</Text>
           </TouchableOpacity>
         </View>
@@ -109,7 +148,6 @@ const AddPlant = ({ modalVisible, setModalVisible }) => {
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
@@ -139,8 +177,8 @@ const styles = StyleSheet.create({
     right: 10,
     width: 30,
     height: 30,
-    borderRadius: 20, 
-    backgroundColor: "#d3d3d3", 
+    borderRadius: 20,
+    backgroundColor: "#d3d3d3",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -155,6 +193,13 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 10,
     borderRadius: 5,
+  },
+  picker: {
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 50,
+    backgroundColor: "#e0e0e0",
+    
   },
   uploadButton: {
     backgroundColor: "#e0e0e0",

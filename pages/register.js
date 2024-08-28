@@ -16,27 +16,32 @@ import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
 const Register = () => {
+  const [username, setUserName] = useState("");
+  const [areaKaryawan, setAreaKaryawan] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
+  
 
   const screenHeight = Dimensions.get("window").height;
 
   const navigateToLogin = () => {
-    navigation.navigate("Dashboard");
+    navigation.navigate("AdminStatusKaryawan");
   };
 
   const handleRegister = async () => {
     try {
-      const response = await fetch("http://192.168.18.22:3000/api/auth/register", {
+      const response = await fetch("https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           role: "user",
+          username: username,
           email: email,
           password: password,
+          areaKaryawan: areaKaryawan,
         }),
       });
   
@@ -44,12 +49,12 @@ const Register = () => {
   
       if (response.ok) {
         Alert.alert("Success", data.message);
-        navigateToLogin(); // Navigate to login screen on successful registration
+        navigateToLogin(); 
       } else {
         Alert.alert("Error", data.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Registration error:", error);  // Log the error for debugging
+      console.error("Registration error:", error); 
       Alert.alert("Error", "Failed to register. Please try again later.");
     }
   };
@@ -64,9 +69,15 @@ const Register = () => {
     >
       <Image source={Logo} style={styles.logo} />
       <View style={styles.logoContainer}></View>
-      <Text style={styles.welcomeText}>REGISTRASI</Text>
+      <Text style={styles.welcomeText}>REGISTRASI KARYAWAN</Text>
       <View style={[styles.innerContainer, { height: screenHeight * 0.45 }]}>
         <View style={styles.inputContainer}>
+          <CustomTextInput
+            placeholder="Nama"
+            value={username}
+            onChangeText={setUserName}
+            imageSource={Username}
+          />
           <CustomTextInput
             placeholder="Email"
             value={email}
@@ -80,6 +91,12 @@ const Register = () => {
             secureTextEntry
             imageSource={Password}
           />
+          <CustomTextInput
+            placeholder="Area"
+            value={areaKaryawan}
+            onChangeText={setAreaKaryawan}
+            imageSource={Password}
+          />
         </View>
         <TouchableOpacity onPress={handleRegister}>
           <LinearGradient
@@ -90,14 +107,6 @@ const Register = () => {
           >
             <Text style={styles.loginButtonText}>Registrasi</Text>
           </LinearGradient>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.registerText}>
-            Sudah punya akun?{" "}
-            <Text style={styles.registerLink} onPress={navigateToLogin}>
-              Masuk
-            </Text>
-          </Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>

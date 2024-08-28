@@ -33,7 +33,7 @@ const AddPlant = ({ modalVisible, setModalVisible }) => {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="Nama Tanaman"
+            placeholder="Nama Karyawan"
             value={name}
             onChangeText={setName}
           />

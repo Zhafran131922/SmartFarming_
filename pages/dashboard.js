@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,14 +6,16 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../components/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
-import AddPlant from "./addPlant";
 import Watered from "../images/siram.png";
 import Fertilized from "../images/pupuk.png";
+import { useAuth } from "../components/AuthContext";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const getCurrentDateTimeWIB = () => {
   const now = new Date();
@@ -36,49 +38,77 @@ const Dashboard = () => {
   const { colors } = useTheme();
   const [dateTime, setDateTime] = useState(getCurrentDateTimeWIB());
   const [modalVisible, setModalVisible] = useState(false);
+  const [plantData, setPlantData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false); // State untuk kontrol refresh
   const navigation = useNavigation();
+  const { token } = useAuth();
 
-  const NavigateToDescription = () => {
-    navigation.navigate("Description");
+  const fetchPlantData = async () => {
+    try {
+      const username = await AsyncStorage.getItem('username');
+      const response = await fetch(
+        `https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/user/tanaman/by-username/${username}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+
+      const plants = Object.values(data).map((plant) => ({
+        id: plant.id,
+        name: plant.name,
+        area: plant.area,
+        username: plant.username,
+        description: plant.description,
+        watered: true,
+        fertilized: true,
+        image: require("../images/tomat.jpg"),
+      }));
+
+      setPlantData(plants);
+    } catch (error) {
+      console.error("Error fetching plant data:", error);
+    }
   };
 
-  const plantData = [
-    {
-      name: "Tomat",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Pepaya",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Jeruk",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Pepaya",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-    {
-      name: "Jeruk",
-      watered: true,
-      fertilized: true,
-      image: require("../images/tomat.jpg"),
-    },
-  ];
+  useEffect(() => {
+    fetchPlantData();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPlantData();
+    setRefreshing(false);
+  };
+
+  const NavigateToDescription = (selectedPlant) => {
+    const matchingPlant = plantData.find(
+      (plant) => plant.name === selectedPlant.name
+    );
+
+    if (matchingPlant) {
+      navigation.navigate("Description", {
+        plant: {
+          id: matchingPlant.id,
+          name: matchingPlant.name,
+          area: matchingPlant.area,
+          description: matchingPlant.description,
+        },
+      });
+    } else {
+      console.error("No matching plant found!");
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         contentContainerStyle={[styles.scrollViewContent, { backgroundColor: colors.background }]}
+        refreshControl={ // Menambahkan RefreshControl di sini
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <LinearGradient
           colors={["#163020", "#0f1e14"]}
@@ -101,7 +131,7 @@ const Dashboard = () => {
               <Text style={styles.weatherDetailText}>Raindrop</Text>
               <Text style={styles.weatherDetailValue}>1000 mm/h</Text>
             </View>
-            <View style={styles.spacing}/>
+            <View style={styles.spacing} />
             <View style={styles.weatherDetailItem}>
               <MaterialIcons name="opacity" size={24} color="white" />
               <Text style={styles.weatherDetailText}>Kelembapan</Text>
@@ -113,7 +143,7 @@ const Dashboard = () => {
           <TouchableOpacity
             key={index}
             style={[styles.plantCard, { backgroundColor: colors.card }]}
-            onPress={NavigateToDescription}
+            onPress={() => NavigateToDescription(plant)}
           >
             <Image source={plant.image} style={styles.plantImage} />
             <View style={styles.plantDetails}>
@@ -121,51 +151,39 @@ const Dashboard = () => {
                 {plant.name}
               </Text>
               <View style={styles.plantStatus}>
-                {plant.watered && (
-                  <View style={styles.watered}>
-                    <Image source={Watered} style={styles.plantIcon} />
-                    <Text
-                      style={[
-                        styles.plantStatusWateredText,
-                        plant.watered && styles.wateredText,
-                      ]}
-                    >
-                      Sudah disiram
-                    </Text>
-                  </View>
-                )}
+                <View style={styles.watered}>
+                  <Image source={Watered} style={styles.plantIcon} />
+                  <Text
+                    style={[
+                      styles.plantStatusWateredText,
+                      styles.wateredText,
+                    ]}
+                  >
+                    Sudah disiram
+                  </Text>
+                </View>
 
-                {plant.fertilized && (
-                  <View style={styles.fertilized}>
-                    <Image source={Fertilized} style={styles.plantIcon} />
-                    <Text
-                      style={[
-                        styles.plantStatusFertilizedText,
-                        plant.fertilized && styles.fertilizedText,
-                      ]}
-                    >
-                      Sudah dipupuk
-                    </Text>
-                  </View>
-                )}
+                <View style={styles.fertilized}>
+                  <Image source={Fertilized} style={styles.plantIcon} />
+                  <Text
+                    style={[
+                      styles.plantStatusFertilizedText,
+                      styles.fertilizedText,
+                    ]}
+                  >
+                    Sudah dipupuk
+                  </Text>
+                </View>
               </View>
             </View>
           </TouchableOpacity>
         ))}
         <View style={styles.bottomSpace} />
       </ScrollView>
-
-      <TouchableOpacity style={styles.circle} onPress={() => setModalVisible(true)}>
-        <Text style={styles.plus}>+</Text>
-      </TouchableOpacity>
-
-      <AddPlant
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-      />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

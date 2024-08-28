@@ -18,13 +18,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#163020"
-      }
+      },
+      "package": "com.zhafran.smartfarming2"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f5f4f1d4-acba-4468-a28a-d44ed11afaaf"
+      }
+    }
   }
 }

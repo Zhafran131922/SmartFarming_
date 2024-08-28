@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,50 +6,120 @@ import {
   Button,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
 } from "react-native";
+import { useRoute } from "@react-navigation/native";
 import editIcon from "../images/edit2.png";
 import deleteIcon from "../images/delete.png";
-import AddPlant from "./addPlant";
+import { useAuth } from "../components/AuthContext";
+import kelembapan from "../images/siram.png";
+import raindrop from "../images/rain.png";
 
-const PlantDetail = () => {
+const PlantDetail = ({ navigation }) => {
+  const route = useRoute();
+  const { plant, onDeletePlant } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
+  const [currentPlant, setCurrentPlant] = useState(plant);
+  const { deletePlant } = useAuth();
+  const [plantData, setPlantData] = useState(null);
+  const { token } = useAuth();
+
+  const handleSave = async (updatedPlant) => {
+    try {
+      const response = await fetch(
+        `https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/update/tanaman/${currentPlant.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatedPlant),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Plant updated successfully");
+        setCurrentPlant(updatedPlant);
+        setModalVisible(false);
+      } else {
+        console.error("Failed to update plant");
+      }
+    } catch (error) {
+      console.error("Error updating plant:", error);
+    }
+  };
+  
+  useEffect(() => {
+    if (plant) {
+      setCurrentPlant(plant);
+    }
+  }, [plant]);
+
+  const fetchPlantData = async () => {
+    try {
+      const response = await fetch(
+        "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/user/get/tanaman"
+      );
+      const data = await response.json();
+
+      const formattedData = Object.values(data).map((plant) => ({
+        id: plant.id,
+        name: plant.name,
+        area: plant.area,
+        description: plant.description,
+        username: plant.username,
+      }));
+
+      console.log("Formatted plant data:", formattedData);
+
+      setPlantData(formattedData);
+    } catch (error) {
+      console.error("Error fetching plant data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlantData();
+  }, []);
+
+  const handleDeletePlant = async () => {
+    try {
+      await deletePlant(currentPlant.id); 
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error deleting plant:', error);
+    }
+  };
+
+  console.log("Received plant data:", plant);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tomat</Text>
+      <Text style={styles.title}>{currentPlant.name}</Text>
       <View style={styles.imagePlaceholder} />
+      <View style={styles.iot}>
+        <View style={styles.kelembapan}>
+          <Image source={kelembapan} style={styles.kelembapanImage} />
+          <Text style={styles.sectionContent}>Kelembapan</Text>
+          <Text style={styles.sectionContent}>58gr/lb</Text>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.kelembapan}>
+          <Image source={raindrop} style={styles.raindropImage} />
+          <Text style={styles.sectionContent}>Raindrop</Text>
+          <Text style={styles.sectionContent}>58gr/lb</Text>
+        </View>
+      </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Area</Text>
-        <Text style={styles.sectionContent}>
-          Lorem Ipsum has been the industry's standard dummy text ever since the
-          1500s
-        </Text>
+        <Text style={styles.sectionContent}>{currentPlant.area}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Deskripsi</Text>
-        <Text style={styles.sectionContent}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book. It has survived not only
-          five centuries
-        </Text>
+        <Text style={styles.sectionContent}>{currentPlant.description}</Text>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
-          <Image source={editIcon} style={styles.editIcon} />
-          <Text style={styles.buttonEditText}>Edit Tanaman</Text>
-        </TouchableOpacity>
-        <View style={styles.divider} />
-        <TouchableOpacity style={styles.deleteButton}>
-          <Image source={deleteIcon} style={styles.deleteIcon} />
-          <Text style={styles.buttonDeleteText}>Hapus Tanaman</Text>
-        </TouchableOpacity>
-      </View>     
-      <AddPlant
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-      />
+
     </View>
   );
 };
@@ -71,6 +141,35 @@ const styles = StyleSheet.create({
     backgroundColor: "#B6C4B6",
     marginBottom: 16,
     borderRadius: 8,
+  },
+  iot: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  kelembapan: {
+    flexDirection: "column",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  kelembapanImage: {
+    width: 50,
+    height: 50,
+    resizeMode: "contain",
+    backgroundColor: "#73D2D8",
+    marginBottom: 8,
+    borderRadius: 100,
+  },
+  raindropImage: {
+    width: 50,
+    height: 50,
+    resizeMode: "contain",
+    backgroundColor: "#D8B673",
+    marginBottom: 8,
+    borderRadius: 100,
+  },
+  divider: {
+    width: 100,
   },
   section: {
     marginBottom: 16,

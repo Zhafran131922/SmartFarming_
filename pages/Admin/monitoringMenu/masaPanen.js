@@ -1,44 +1,118 @@
-import React from "react";
-import { StyleSheet, Text, View, ScrollView, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useTheme } from "../../../components/ThemeContext";
+import { useAuth } from "../../../components/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
 const MasaPanen = () => {
-  const plantData = [
-    {
-      name: "Jeruk",
-      date: "2023-05-01",
-      image: require("../../../images/tomat.jpg"),
-    },
-    {
-      name: "Cabai",
-      date: "2023-05-01",
-      image: require("../../../images/tomat.jpg"),
-    },
-    {
-      name: "Timun",
-      date: "2023-05-01",
-      image: require("../../../images/tomat.jpg"),
-    },
-    {
-      name: "Timun",
-      date: "2023-05-01",
-      image: require("../../../images/tomat.jpg"),
-    },
-  ];
+  const { colors } = useTheme();
+  const { token } = useAuth();
+  const [plantData, setPlantData] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchPlantData = async () => {
+      try {
+        const response = await fetch(
+          "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/get/tanaman",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+
+        const plants = Object.values(data).map((plant) => ({
+          id: plant.id,
+          name: plant.name,
+          watered: plant.watered, 
+          area: plant.area,
+          description: plant.description,
+          username: plant.username,
+          image: plant.image || getPlantImage({ name: plant.name }),
+        }));
+
+        setPlantData(plants);
+      } catch (error) {
+        console.error("Error fetching plant data:", error);
+      }
+    };
+
+    fetchPlantData();
+  }, [token]);
+
+
+
+  const NavigateToDescription = (selectedPlant) => {
+    const matchingPlant = plantData.find(
+      (plant) => plant.name === selectedPlant.name
+    );
+
+    if (matchingPlant) {
+      navigation.navigate("AdminDescription", {
+        plant: {
+          id: matchingPlant.id,
+          name: matchingPlant.name,
+          area: matchingPlant.area,
+          description: matchingPlant.description,
+          username: matchingPlant.username,
+        },
+      });
+    } else {
+      console.error("No matching plant found!");
+    }
+  };
+
+
+  const filteredPlants = plantData.filter((plant) =>
+    plant.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+  const getPlantImage = (plant) => {
+    if (plant.image) {
+      return { uri: plant.image };
+    } else {
+      switch (plant.name) {
+        case "Tomat":
+          return require("../../../images/tomat.jpg");
+        case "Pepaya":
+          return require("../../../images/tomat.jpg");
+        case "Jeruk":
+          return require("../../../images/tomat.jpg");
+        default:
+          return require("../../../images/tomat.jpg");
+      }
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollViewContent, { backgroundColor: colors.background }]}
+      >
         {plantData.map((plant, index) => (
-          <View key={index} style={styles.plantCard}>
+          <TouchableOpacity key={index} onPress={() => NavigateToDescription(plant)} style={[styles.plantCard, { backgroundColor: colors.card }]}>
             <Image source={plant.image} style={styles.plantImage} />
             <View style={styles.plantDetails}>
-              <Text style={styles.plantName}>{plant.name}</Text>
-              <View style={styles.panen}>
-                <Text style={styles.dateLabel}>{`Siap Panen:`}</Text>
-                <Text style={styles.dateValue}>{plant.date}</Text>
+              <Text style={[styles.plantName, { color: colors.text }]}>
+                {plant.name}
+              </Text>
+              <View style={styles.masaPanen}>
+                <Text style={styles.textDate}>Siap Panen</Text>
+                <Text style={styles.Date}>10/10/2023</Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
@@ -49,6 +123,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  scrollViewContent: {
+    paddingBottom: 70,
   },
   plantCard: {
     backgroundColor: "#E0E0E0",
@@ -77,52 +154,57 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   plantDetails: {
-    marginLeft: 150,
-    justifyContent: "center",
-    marginLeft: 49,
-    left: -40,
     flex: 1,
+    marginLeft: 20,
   },
   plantName: {
     fontSize: 18,
     fontWeight: "bold",
-    marginLeft: 10,
-    top: -10,
   },
-  panen: {
+  plantArea: {
+    fontSize: 14,
+    marginTop: 5,
+  },
+  masaPanen: {
     flexDirection: "row",
-    justifyContent: "flex-start",
-  },
-  area: {
-    fontSize: 17,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  dateLabel: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "black",
-  },
-  dateValue: {
-    fontSize: 17,
-    marginLeft: 10,
-    color: "red",
-  },
-  plantStatus: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginTop: 10,
-    marginLeft: 10,
   },
-  plantStatusText: {
-    padding: 10,
-    borderRadius: 5,
+  textDate: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  Date: {
+    fontSize: 16,
     color: "white",
     marginLeft: 10,
+    backgroundColor: "#2F4C2F",
+    padding: 5,
+    borderRadius: 10,
+    alignSelf: "flex-start",
+    flexShrink: 1,
   },
   plantIcon: {
     marginRight: -5,
+    width: 20,
+    height: 20,
+  },
+  watered: {
+    backgroundColor: "#73D2D8",
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 1,
+    marginTop: 8,
+    borderRadius: 20,
+    width: 140,
+    paddingHorizontal: 10,
+  },
+  plantStatusWateredText: {
+    padding: 6,
+    borderRadius: 5,
+    color: "#01316B",
+    fontWeight: "lighter",
+    marginLeft: 10,
+    fontSize: 13,
   },
 });
-
 export default MasaPanen;

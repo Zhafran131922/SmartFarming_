@@ -6,45 +6,83 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  TextInput,
+  RefreshControl,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useTheme } from "../../../components/ThemeContext";
 import { useAuth } from "../../../components/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
 const Penyiraman = () => {
   const { colors } = useTheme();
   const { token } = useAuth();
   const [plantData, setPlantData] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
+
+  const fetchPlantData = async () => {
+    try {
+      const response = await fetch(
+        "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/get/tanaman",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+
+      const plants = Object.values(data).map((plant) => ({
+        id: plant.id,
+        name: plant.name,
+        watered: plant.watered,
+        area: plant.area,
+        description: plant.description,
+        username: plant.username,
+        image: plant.image || getPlantImage({ name: plant.name }),
+      }));
+
+      setPlantData(plants);
+    } catch (error) {
+      console.error("Error fetching plant data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchPlantData = async () => {
-      try {
-        const response = await fetch(
-          "http://192.168.18.22:3000/api/admin/get/tanaman",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await response.json();
-
-        const plants = Object.values(data).map((plant) => ({
-          id: plant.id,
-          name: plant.name,
-          watered: plant.watered || false,
-          fertilized: plant.fertilized || false,
-          image: plant.image || getPlantImage({ name: plant.name }),
-        }));
-
-        setPlantData(plants);
-      } catch (error) {
-        console.error("Error fetching plant data:", error);
-      }
-    };
-
     fetchPlantData();
   }, [token]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPlantData(); 
+    setRefreshing(false);
+  };
+
+  const NavigateToDescription = (selectedPlant) => {
+    const matchingPlant = plantData.find(
+      (plant) => plant.name === selectedPlant.name
+    );
+
+    if (matchingPlant) {
+      navigation.navigate("AdminDescription", {
+        plant: {
+          id: matchingPlant.id,
+          name: matchingPlant.name,
+          area: matchingPlant.area,
+          description: matchingPlant.description,
+          username: matchingPlant.username,
+        },
+      });
+    } else {
+      console.error("No matching plant found!");
+    }
+  };
+
+  const filteredPlants = plantData.filter((plant) =>
+    plant.name.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const getPlantImage = (plant) => {
     if (plant.image) {
@@ -65,12 +103,34 @@ const Penyiraman = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-        {plantData.map((plant, index) => (
-          <View key={index} style={[styles.plantCard, { backgroundColor: colors.card }]}>
+      <View style={styles.searchContainer}>
+        <FontAwesome5 name="search" size={20} color={colors.text} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search"
+          placeholderTextColor={colors.text}
+          onChangeText={(text) => setSearchText(text)}
+          value={searchText}
+        />
+      </View>
+
+      <ScrollView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {filteredPlants.map((plant, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[styles.plantCard, { backgroundColor: colors.card }]}
+            onPress={() => NavigateToDescription(plant)}
+          >
             <Image source={plant.image} style={styles.plantImage} />
             <View style={styles.plantDetails}>
-              <Text style={[styles.plantName, { color: colors.text }]}>{plant.name}</Text>
+              <Text style={[styles.plantName, { color: colors.text }]}>
+                {plant.name}
+              </Text>
               <View style={styles.plantStatus}>
                 <View style={styles.watered}>
                   <FontAwesome5
@@ -87,11 +147,12 @@ const Penyiraman = () => {
                   >
                     {plant.watered ? "Sudah disiram" : "Belum disiram"}
                   </Text>
-                  </View>
+                </View>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
+        <View style={styles.bottomSpace} />
       </ScrollView>
     </View>
   );
@@ -101,6 +162,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#f5f5f5",
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#333",
   },
   weatherCard: {
     backgroundColor: "#163020",
@@ -244,6 +317,9 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  bottomSpace: {
+    height: 100,
   },
 });
 

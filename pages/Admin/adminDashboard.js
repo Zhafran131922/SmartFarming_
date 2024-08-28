@@ -16,6 +16,8 @@ import Watered from "../../images/siram.png";
 import Fertilized from "../../images/pupuk.png";
 import Checklist from "../../images/verified.png";
 import { useAuth } from "../../components/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RefreshControl } from "react-native";
 
 const getCurrentDateTimeWIB = () => {
   const now = new Date();
@@ -41,12 +43,13 @@ const AdminDashboard = () => {
   const [plantData, setPlantData] = useState([]);
   const navigation = useNavigation();
   const { token } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+
     const fetchPlantData = async () => {
       try {
         const response = await fetch(
-          "http://192.168.18.22:3000/api/admin/get/tanaman",
+          "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/get/tanaman",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -60,19 +63,100 @@ const AdminDashboard = () => {
           name: plant.name,
           area: plant.area,
           description: plant.description,
+          username: plant.username,
           watered: true,
           fertilized: true,
           image: require("../../images/tomat.jpg"),
         }));
 
         setPlantData(plants);
+
+        await AsyncStorage.setItem("plantData", JSON.stringify(plants));
       } catch (error) {
         console.error("Error fetching plant data:", error);
       }
     };
-
+    useEffect(() => {
     fetchPlantData();
   }, [token]);
+
+  useEffect(() => {
+    const loadStoredPlantData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem("plantData");
+        if (storedData) {
+          setPlantData(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.error("Error loading plant data from AsyncStorage:", error);
+      }
+    };
+
+    loadStoredPlantData();
+  }, []);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPlantData();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      try {
+        const response = await fetch(
+          "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/get/tanaman",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+
+        const plants = Object.values(data).map((plant) => ({
+          id: plant.id,
+          name: plant.name,
+          area: plant.area,
+          description: plant.description,
+          username: plant.username,
+          watered: true,
+          fertilized: true,
+          image: require("../../images/tomat.jpg"),
+        }));
+
+        // Only update the state if the data has changed
+        if (JSON.stringify(plants) !== JSON.stringify(plantData)) {
+          setPlantData(plants);
+          // Simpan data ke AsyncStorage
+          await AsyncStorage.setItem("plantData", JSON.stringify(plants));
+        }
+      } catch (error) {
+        console.error("Error fetching plant data:", error);
+      }
+    }, 30000); // Polling every 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [token, plantData]);
+
+
+  const handleAddPlant = (newPlant) => {
+    setPlantData((prevPlants) => [...prevPlants, newPlant]);
+  };
+
+  const handleDeletePlant = (plantId) => {
+    setPlantData((prevPlants) =>
+      prevPlants.filter((plant) => plant.id !== plantId)
+    );
+  };
+
+  const handleEditPlant = (updatedPlant) => {
+    setPlantData((prevPlants) =>
+      prevPlants.map((plant) =>
+        plant.id === updatedPlant.id ? updatedPlant : plant
+      )
+    );
+  };
 
   const NavigateToDescription = (selectedPlant) => {
     const matchingPlant = plantData.find(
@@ -86,7 +170,10 @@ const AdminDashboard = () => {
           name: matchingPlant.name,
           area: matchingPlant.area,
           description: matchingPlant.description,
+          username: matchingPlant.username,
         },
+        onDeletePlant: handleDeletePlant,
+        onEditPlant: handleEditPlant,
       });
     } else {
       console.error("No matching plant found!");
@@ -100,6 +187,9 @@ const AdminDashboard = () => {
           styles.scrollViewContent,
           { backgroundColor: colors.background },
         ]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       >
         <LinearGradient
           colors={["#163020", "#0f1e14"]}
@@ -111,10 +201,7 @@ const AdminDashboard = () => {
           <Text style={styles.time}>{dateTime.time}</Text>
           <View style={styles.admintextcontainer}>
             <Text style={styles.admintext}>Admin Page</Text>
-            <Image
-              source={Checklist}
-              style={styles.verified}
-            />
+            <Image source={Checklist} style={styles.verified} />
           </View>
           <Text style={styles.temperature}>22°C</Text>
           <FontAwesome5
@@ -190,7 +277,11 @@ const AdminDashboard = () => {
         <Text style={styles.plus}>+</Text>
       </TouchableOpacity>
 
-      <AdminAddPlant modalVisible={modalVisible} setModalVisible={setModalVisible} />
+      <AdminAddPlant
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        onAddPlant={handleAddPlant}
+      />
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,71 +7,76 @@ import {
   Dimensions,
   Image,
   Alert,
-} from "react-native";
-import Logo from "../images/logo2.png";
-import Email from "../images/email.png";
-import Password from "../images/password.png";
-import CustomTextInput from "../components/CustomTextInput";
-import { useNavigation } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useAuth } from "../components/AuthContext";
-
-
+} from 'react-native';
+import Logo from '../images/logo2.png';
+import Email from '../images/email.png';
+import Password from '../images/password.png';
+import CustomTextInput from '../components/CustomTextInput';
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '../components/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const navigation = useNavigation();
-  const { setToken } = useAuth();
+  
 
-  const screenHeight = Dimensions.get("window").height;
+  const screenHeight = Dimensions.get('window').height;
 
   const navigateToRegister = () => {
-    navigation.navigate("Register");
+    navigation.navigate('Register');
+  };
+
+  const navigateToForgotPassword = () => {
+    navigation.navigate('ForgotPassword');
   };
 
   const navigateToDashboard = (role) => {
-    if (role === "admin") {
-      navigation.navigate("AdminDashboard");
+    if (role === 'admin') {
+      navigation.navigate('AdminDashboard');
     } else {
-      navigation.navigate("Dashboard");
+      navigation.navigate('Dashboard');
     }
   };
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://192.168.18.22:3000/api/auth/login", {
-        method: "POST",
+      const response = await fetch('https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/auth/login', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email,
-          password: password,
+          username: username,  
+          password: password,  
         }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (response.ok) {
-        // Store the token
-        setToken(data.token);
-        Alert.alert("Success", "Logged in successfully!");
-        console.log("Token:", data.token);
-        console.log("Role:", data.role);
-        navigateToDashboard(data.role);
+      if (result.token) {
+        await AsyncStorage.setItem('token', result.token);
+        await AsyncStorage.setItem('username', username);  
+
+
+        if (result.role === 'admin') {
+          navigation.navigate('AdminDashboard');
+        } else {
+          navigation.navigate('Dashboard');
+        }
       } else {
-        Alert.alert("Error", data.message || "Login failed. Please try again.");
+        Alert.alert('Login failed', result.message);
       }
     } catch (error) {
-      console.error("Login error:", error);
-      Alert.alert("Error", "Failed to login. Please try again later.");
+      console.error('Error during login:', error);
     }
   };
 
   return (
     <LinearGradient
-      colors={["#163020", "#0f1e14"]}
+      colors={['#163020', '#0f1e14']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
@@ -83,8 +88,8 @@ const Login = () => {
         <View style={styles.inputContainer}>
           <CustomTextInput
             placeholder="Username/Email"
-            value={email}
-            onChangeText={setEmail}
+            value={username}
+            onChangeText={setUsername}
             imageSource={Email}
           />
           <CustomTextInput
@@ -95,12 +100,12 @@ const Login = () => {
             imageSource={Password}
           />
         </View>
-        <TouchableOpacity style={styles.forgotPasswordContainer}>
+        <TouchableOpacity style={styles.forgotPasswordContainer} onPress={navigateToForgotPassword}>
           <Text style={styles.forgotPassword}>Lupa password?</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleLogin}>
           <LinearGradient
-            colors={["#163020", "#0f1e14"]}
+            colors={['#163020', '#0f1e14']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.loginButton}
@@ -110,7 +115,7 @@ const Login = () => {
         </TouchableOpacity>
         <TouchableOpacity>
           <Text style={styles.registerText}>
-            Tidak punya akun?{" "}
+            Tidak punya akun?{' '}
             <Text style={styles.registerLink} onPress={navigateToRegister}>
               Registrasi
             </Text>
@@ -120,6 +125,7 @@ const Login = () => {
     </LinearGradient>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

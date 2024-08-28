@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   area: {
-    fontSize: 17,
+    fontSize: 16,
     marginLeft: 10,
     backgroundColor: "#2F4C2F",
     color: "#fff",

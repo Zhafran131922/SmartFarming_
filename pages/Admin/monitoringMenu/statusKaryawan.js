@@ -1,49 +1,92 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity } from "react-native";
-import AddKaryawan from "./addKaryawan";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../../../components/AuthContext";
 
 const StatusKaryawan = () => {
   const [karyawan, setKaryawan] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+  const { token } = useAuth();
 
   useEffect(() => {
-    const fetchKaryawan = async () => {
+    const fetchKaryawanData = async () => {
       try {
-        const response = await fetch("http://192.168.18.22:3000/api/admin/get/karyawan");
+        const response = await fetch(
+          "https://smart-farming-mu5mgd7zh-alifians-projects-30bb1aa5.vercel.app/api/admin/getUser/users",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = await response.json();
-        setKaryawan(data);
+  
+        const filteredData  = Object.values(data).map((user) => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          areaKaryawan: user.areaKaryawan,
+        }));
+  
+        setKaryawan(filteredData);
       } catch (error) {
-        console.error("Error fetching karyawan:", error);
+        console.error("Error fetching plant data:", error);
       }
     };
-    fetchKaryawan();
-  }, []);
+  
+    fetchKaryawanData();
+  }, [token]);
 
+  const navigateToRegister = () => {
+    navigation.navigate("Register");
+  };
+
+
+  const AdminDetailKaryawan = (selectedKaryawan) => {
+    const matchingKaryawan = karyawan.find(
+      (user) => user.username === selectedKaryawan.username
+    );
+  
+    if (matchingKaryawan) {
+      navigation.navigate("AdminDetailKaryawan", {
+        karyawan: {
+          id: matchingKaryawan.id,
+          username: matchingKaryawan.username,
+          email: matchingKaryawan.email,
+          areaKaryawan: matchingKaryawan.areaKaryawan,
+        },
+      });
+    } else {
+      console.error("No matching karyawan found!");
+    }
+  };
+  
   return (
     <View style={styles.container}>
       <ScrollView style={styles.container}>
         {karyawan.map((karyawan, index) => (
-          <View key={index} style={styles.plantCard}>
+          <TouchableOpacity key={index} style={styles.karyawanCard} onPress={() => AdminDetailKaryawan(karyawan)}>
             <Image
               source={require("../../../images/tomat.jpg")}
-              style={styles.plantImage}
+              style={styles.karyawanImage}
             />
-            <View style={styles.plantDetails}>
-              <Text style={styles.karyawan}>{karyawan.name}</Text>
-              <Text style={styles.area}>{karyawan.area}</Text>
+            <View style={styles.karyawanDetails}>
+              <Text style={styles.karyawan}>{karyawan.username}</Text>
+              <Text style={styles.area}>{karyawan.areaKaryawan}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
-        <View style={styles.bottomSpace} />
       </ScrollView>
-      <TouchableOpacity
-        style={styles.circle}
-        onPress={() => setModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.circle} onPress={navigateToRegister}>
         <Text style={styles.plus}>+</Text>
       </TouchableOpacity>
-
-      <AddKaryawan modalVisible={modalVisible} setModalVisible={setModalVisible} />
     </View>
   );
 };
@@ -53,7 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  plantCard: {
+  karyawanCard: {
     backgroundColor: "#E0E0E0",
     padding: 12,
     borderRadius: 10,
@@ -72,14 +115,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  plantImage: {
+  karyawanImage: {
     width: 70,
     height: 70,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
-  plantDetails: {
+  karyawanDetails: {
     marginLeft: 150,
     justifyContent: "center",
     marginLeft: 49,
@@ -101,14 +144,14 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     flexShrink: 1,
   },
-  plantStatus: {
+  karyawanStatus: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 10,
     marginLeft: 10,
   },
 
-  plantIcon: {
+  karyawanIcon: {
     marginRight: -5,
   },
   circle: {

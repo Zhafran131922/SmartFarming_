@@ -19,17 +19,19 @@ import Tentang from "./pages/tentang";
 import StatusKaryawan from "./pages/monitoringMenu/statusKaryawan";
 import AdminDashboard from "./pages/Admin/adminDashboard";
 import AdminDescription from "./pages/Admin/adminDescription";
+import ForgotPassword from "./pages/forgotPassword";
+import ResetPassword from "./pages/resetPassword";
 import AdminAddPlant from "./pages/Admin/adminAddPlant";
 import AdminEditPlant from "./pages/Admin/adminEditPlant";
 import AdminNavbar from "./components/AdminNavbar";
 import AdminMonitoring from "./pages/Admin/adminMonitoring";
+import AdminTentang from "./pages/Admin/adminTentang";
 import AdminSettings from "./pages/Admin/adminSettings";
 import AdminMasaPanen from "./pages/Admin/monitoringMenu/masaPanen";
 import AdminPemupukan from "./pages/Admin/monitoringMenu/pemupukan";
 import AdminPenyiraman from "./pages/Admin/monitoringMenu/penyiraman";
+import AdminDetailKaryawan from "./pages/Admin/monitoringMenu/karyawanDetail"
 import AdminStatusKaryawan from "./pages/Admin/monitoringMenu/statusKaryawan";
-
-
 import { AuthProvider } from "./components/AuthContext";
 import { ThemeProvider, useTheme } from "./components/ThemeContext";
 import { StatusBar } from "react-native";
@@ -77,7 +79,9 @@ export default function App() {
     "AdminMasaPanen",
     "AdminPemupukan",
     "AdminPenyiraman",
+    "AdminTentang",
     "AdminStatusKaryawan",
+    "AdminDetailKaryawan",
   ].includes(currentRoute);
 
   return (
@@ -85,7 +89,7 @@ export default function App() {
       <AuthProvider>
         <ThemedStatusBar />
         <NavigationContainer ref={navigationRef}>
-          <Stack.Navigator initialRouteName="Register">
+          <Stack.Navigator initialRouteName="Login">
             <Stack.Screen name="Dashboard" component={Dashboard} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />
@@ -97,19 +101,23 @@ export default function App() {
             <Stack.Screen name="Pemupukan" component={Pemupukan} />
             <Stack.Screen name="Penyiraman" component={Penyiraman} />
             <Stack.Screen name="StatusKaryawan" component={StatusKaryawan} />
-
+            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+            <Stack.Screen name="ResetPassword" component={ResetPassword} />
+            {/* Admin Page */}
             <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
             <Stack.Screen name="AdminDescription" component={AdminDescription} />
             <Stack.Screen name="AdminEditPlant" component={AdminEditPlant} />
             <Stack.Screen name="AdminAddPlant" component={AdminAddPlant} />
             <Stack.Screen name="AdminMonitoring" component={AdminMonitoring} />
+            <Stack.Screen name="AdminDetailKaryawan" component={AdminDetailKaryawan} />
             <Stack.Screen name="AdminSettings" component={AdminSettings} />
             <Stack.Screen name="AdminMasaPanen" component={AdminMasaPanen} />
             <Stack.Screen name="AdminPemupukan" component={AdminPemupukan} />
+            <Stack.Screen name="AdminTentang" component={AdminTentang} />
             <Stack.Screen name="AdminPenyiraman" component={AdminPenyiraman} />
             <Stack.Screen name="AdminStatusKaryawan" component={AdminStatusKaryawan} />
           </Stack.Navigator>
-          {!["Register", "Login"].includes(currentRoute) &&
+          {!["Register", "Login", "ForgotPassword", "ResetPassword"].includes(currentRoute) &&
             (isAdminRoute ? <AdminNavbar /> : <Navbar />)}
         </NavigationContainer>
       </AuthProvider>
